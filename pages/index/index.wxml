@@ -1,0 +1,17 @@
+<image src="/images/s.png" style="height: 100rpx;width: 150rpx;"/>
+<view class="desc">流动图书是一个图书漂流和借阅工具，都在共享闲置图书，并链接趣味相投的小伙伴。</view>
+<text class="text-line">  </text>
+<text class="text-line">  </text>
+<view class="sub-desc">漂流图书到公司或学校，结识志趣相投的TA,快来开始你的图书漂流之旅吧！</view>
+<button class="scan-btn"bindtap="scanBook">扫一扫漂流图书</button>
+<text class="text-line">  </text>
+<text class="text-line">  </text>
+<text class="text-line">  </text>
+<text class="text-line">  </text>
+
+<!--新书速递区域-->
+<text class="section-title">新书速递</text>
+<view class="text-left">
+</view>
+  <image src="/images/Y.jpg" style="width: 400rpx;height: 380rpx;"/>
+<image src="/images/JA.jpg" style="width: 350rpx;height: 380rpx;"/>

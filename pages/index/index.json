@@ -1,0 +1,7 @@
+{
+  "usingComponents": {},
+   "navigationBarTitleText": "流动图书馆",
+   "navigationBarBackgroundColor": "#000000",
+   "enablePullDownRefresh": true,
+   "backgroundTextStyle": "light"
+}

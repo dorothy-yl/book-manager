@@ -1,0 +1,57 @@
+/**index.wxss**/
+page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+ text-left{text-align: left;}
+
+.desc,sub-desc{
+  font-size: 28rpx;
+  color: #666;
+  line-height: 44rpx;
+  margin-bottom: 10rpx;
+  display: block;
+}
+.text-line{
+  display: block;
+  margin-bottom: 16rpx;
+}
+.text-line:last-child{
+margin-bottom: 0;
+}
+
+.sub-desc{
+  font-size: 28rpx;
+  color: #666;
+  line-height: 44rpx;
+  margin-bottom: 10rpx;
+  display: block;
+}
+
+.scan-btn{
+background-color: #333;
+color: #FFF;
+font-size: 38rpx;
+padding: 30rpx 50rpx;
+border-radius: 150rpx 150rpx 150rpx 150rpx;
+margin-top: 20rpx;
+}
+
+
+
+.text-line:last-child{
+  margin-bottom: 0;
+}
+
+.section-titl{
+  font-size: 33rpx;
+  font-weight: bold;
+margin-bottom: 20rpx;
+display: block;
+}
+
+.text-left{
+  text-align: left;
+}
