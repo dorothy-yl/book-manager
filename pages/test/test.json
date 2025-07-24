@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "网络请求测试",
+  "navigationBarBackgroundColor": "#848ad8",
+  "navigationBarTextStyle": "white",
+  "backgroundColor": "#f7f7f7",
+  "enablePullDownRefresh": true
+} 

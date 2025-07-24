@@ -1,44 +1,16 @@
 // index.js
+const { statsAPI, bookAPI, scanAPI } = require('../../utils/api.js');
+
 Page({
   data: {
-    // 页面数据,
-    searchKeyword: '99+',
-    totalBooks: 1256,
-    activeExchanges: 89,
-    activeUsers: 342,
-    newBooks: [
-      {
-        id: 1,
-        title: 'JavaScript权威指南',
-        author: 'David Flanagan',
-        cover: '/images/js-guide.jpg',
-        status: 'available'
-      },
-      {
-        id: 2,
-        title: '了不起的Node.js',
-        author: '朴灵',
-        cover: '/images/JA.jpg',
-        status: 'borrowed'
-      },
-      {
-        id: 3,
-        title: '深入理解计算机系统',
-        author: 'Randal E. Bryant',
-        cover: '/images/CS.jpg',
-        status: 'available'
-      }
-    ],
-    categories: [
-      { id: 1, name: '编程', icon: '💻', count: 156 },
-      { id: 2, name: '文学', icon: '📚', count: 89 },
-      { id: 3, name: '科技', icon: '🔬', count: 67 },
-      { id: 4, name: '历史', icon: '📜', count: 45 },
-      { id: 5, name: '艺术', icon: '🎨', count: 34 },
-      { id: 6, name: '哲学', icon: '🤔', count: 23 },
-      { id: 7, name: '经济', icon: '💰', count: 56 },
-      { id: 8, name: '其他', icon: '📖', count: 78 }
-    ]
+    // 页面数据
+    searchKeyword: '',
+    totalBooks: 0,
+    activeExchanges: 0,
+    activeUsers: 0,
+    newBooks: [],
+    categories: [],
+    loading: false
   },
 
   onLoad: function() {
@@ -52,23 +24,75 @@ Page({
   },
 
   // 加载页面数据
-  loadPageData: function() {
-    // 模拟加载数据
-    wx.showLoading({
-      title: '加载中...',
-    });
+  async loadPageData() {
+    this.setData({ loading: true });
+    
+    try {
+      // 显示加载提示
+      wx.showLoading({
+        title: '加载中...',
+      });
 
-    setTimeout(() => {
+      console.log('开始加载页面数据...');
+
+      // 并行请求多个接口
+      const [homeStats, newBooks, categories] = await Promise.all([
+        statsAPI.getHomeStats().catch(err => {
+          console.warn('获取首页统计失败:', err);
+          return { code: 0, data: { totalBooks: 0, activeExchanges: 0, activeUsers: 0 } };
+        }),
+        bookAPI.getBookList({ limit: 6, sort: 'created_at' }).catch(err => {
+          console.warn('获取新书列表失败:', err);
+          return { code: 0, data: { list: [] } };
+        }),
+        bookAPI.getCategories().catch(err => {
+          console.warn('获取分类列表失败:', err);
+          return { code: 0, data: [] };
+        })
+      ]);
+
+      console.log('页面数据加载完成:', { homeStats, newBooks, categories });
+
+      // 更新页面数据
+      this.setData({
+        totalBooks: homeStats.data?.totalBooks || 0,
+        activeExchanges: homeStats.data?.activeExchanges || 0,
+        activeUsers: homeStats.data?.activeUsers || 0,
+        newBooks: newBooks.data?.list || [],
+        categories: categories.data || []
+      });
+
+    } catch (error) {
+      console.error('加载页面数据失败:', error);
+      wx.showToast({
+        title: '加载失败，请重试',
+        icon: 'none'
+      });
+    } finally {
+      this.setData({ loading: false });
       wx.hideLoading();
-    }, 1000);
+    }
   },
 
   // 更新通知数量
-  updateNotificationCount: function() {
-    // 这里可以从服务器获取最新的通知数量
-    this.setData({
-      notificationCount: Math.floor(Math.random() * 5)
-    });
+  async updateNotificationCount() {
+    try {
+      const response = await wx.request({
+        url: 'http://localhost:3000/api/notifications/unread-count',
+        method: 'GET',
+        header: {
+          'Authorization': `Bearer ${wx.getStorageSync('token')}`
+        }
+      });
+      
+      if (response.statusCode === 200 && response.data.code === 0) {
+        this.setData({
+          notificationCount: response.data.data.count || 0
+        });
+      }
+    } catch (error) {
+      console.error('获取通知数量失败:', error);
+    }
   },
 
   // 搜索输入
@@ -79,8 +103,10 @@ Page({
   },
 
   // 执行搜索
-  onSearch: function() {
-    if (!this.data.searchKeyword.trim()) {
+  async onSearch() {
+    const keyword = this.data.searchKeyword.trim();
+    
+    if (!keyword) {
       wx.showToast({
         title: '请输入搜索关键词',
         icon: 'none'
@@ -88,30 +114,77 @@ Page({
       return;
     }
 
-    wx.showLoading({
-      title: '搜索中...',
-    });
+    try {
+      wx.showLoading({
+        title: '搜索中...',
+      });
 
-    setTimeout(() => {
-      wx.hideLoading();
+      const response = await bookAPI.searchBooks(keyword);
+      
+      // 跳转到图书页面并传递搜索结果
+      wx.switchTab({
+        url: '/pages/books/books',
+        success: () => {
+          // 通过全局数据传递搜索结果
+          getApp().globalData = getApp().globalData || {};
+          getApp().globalData.searchResults = response.data.list;
+          getApp().globalData.searchKeyword = keyword;
+        }
+      });
+
+    } catch (error) {
+      console.error('搜索失败:', error);
       wx.showToast({
-        title: `搜索"${this.data.searchKeyword}"`,
+        title: '搜索失败，请重试',
         icon: 'none'
       });
-    }, 1000);
+    } finally {
+      wx.hideLoading();
+    }
   },
 
   // 显示通知
-  showNotifications: function() {
-    wx.showActionSheet({
-      itemList: ['系统通知', '借阅提醒', '新书推荐'],
-      success: (res) => {
-        wx.showToast({
-          title: '查看通知',
-          icon: 'none'
+  async showNotifications() {
+    try {
+      const response = await wx.request({
+        url: 'http://localhost:3000/api/notifications',
+        method: 'GET',
+        header: {
+          'Authorization': `Bearer ${wx.getStorageSync('token')}`
+        }
+      });
+
+      if (response.statusCode === 200 && response.data.code === 0) {
+        const notifications = response.data.data.list || [];
+        const itemList = notifications.map(item => item.title);
+        
+        if (itemList.length === 0) {
+          wx.showToast({
+            title: '暂无通知',
+            icon: 'none'
+          });
+          return;
+        }
+
+        wx.showActionSheet({
+          itemList: itemList,
+          success: (res) => {
+            const selectedNotification = notifications[res.tapIndex];
+            wx.showModal({
+              title: selectedNotification.title,
+              content: selectedNotification.content,
+              showCancel: false
+            });
+          }
         });
       }
-    });
+    } catch (error) {
+      console.error('获取通知失败:', error);
+      wx.showToast({
+        title: '获取通知失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 显示设置
@@ -128,27 +201,44 @@ Page({
   },
 
   // 扫描图书功能
-  scanBook: function() {
+  async scanBook() {
     wx.showModal({
       title: '扫描图书',
       content: '是否使用相机扫描图书条形码？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
-          wx.scanCode({
-            success: (res) => {
-              wx.showToast({
-                title: '扫描成功',
-                icon: 'success'
+          try {
+            const scanResult = await new Promise((resolve, reject) => {
+              wx.scanCode({
+                success: resolve,
+                fail: reject
               });
-              console.log('扫描结果:', res.result);
-            },
-            fail: (err) => {
-              wx.showToast({
-                title: '扫描失败',
-                icon: 'none'
-              });
-            }
-          });
+            });
+
+            wx.showLoading({
+              title: '处理中...',
+            });
+
+            // 调用扫码API
+            const response = await scanAPI.scanAddBook(scanResult.result);
+            
+            wx.hideLoading();
+            wx.showToast({
+              title: '扫描成功',
+              icon: 'success'
+            });
+
+            // 刷新页面数据
+            this.loadPageData();
+
+          } catch (error) {
+            wx.hideLoading();
+            console.error('扫描失败:', error);
+            wx.showToast({
+              title: '扫描失败',
+              icon: 'none'
+            });
+          }
         }
       }
     });
@@ -197,20 +287,84 @@ Page({
   },
 
   // 查看图书详情
-  viewBookDetail: function(e) {
+  async viewBookDetail(e) {
     const bookId = e.currentTarget.dataset.id;
-    wx.showModal({
-      title: '图书详情',
-      content: `查看图书ID: ${bookId} 的详细信息`,
-      showCancel: false
-    });
+    
+    try {
+      wx.showLoading({
+        title: '加载中...',
+      });
+
+      const response = await bookAPI.getBookDetail(bookId);
+      
+      wx.hideLoading();
+      
+      // 显示图书详情
+      const book = response.data;
+      wx.showModal({
+        title: book.title,
+        content: `作者：${book.author}\n分类：${book.category}\n状态：${book.status}\n简介：${book.description || '暂无简介'}`,
+        showCancel: true,
+        cancelText: '关闭',
+        confirmText: '借阅',
+        success: (res) => {
+          if (res.confirm) {
+            this.borrowBook(bookId);
+          }
+        }
+      });
+
+    } catch (error) {
+      wx.hideLoading();
+      console.error('获取图书详情失败:', error);
+      wx.showToast({
+        title: '获取详情失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  // 借阅图书
+  async borrowBook(bookId) {
+    try {
+      wx.showLoading({
+        title: '借阅中...',
+      });
+
+      await bookAPI.borrowBook(bookId);
+      
+      wx.hideLoading();
+      wx.showToast({
+        title: '借阅成功',
+        icon: 'success'
+      });
+
+      // 刷新页面数据
+      this.loadPageData();
+
+    } catch (error) {
+      wx.hideLoading();
+      console.error('借阅失败:', error);
+      wx.showToast({
+        title: '借阅失败',
+        icon: 'none'
+      });
+    }
   },
 
   // 查看分类
-  viewCategory: function(e) {
+  async viewCategory(e) {
     const categoryId = e.currentTarget.dataset.id;
     const category = this.data.categories.find(cat => cat.id === categoryId);
     
+    if (!category) {
+      wx.showToast({
+        title: '分类不存在',
+        icon: 'none'
+      });
+      return;
+    }
+
     wx.showModal({
       title: category.name,
       content: `该分类共有 ${category.count} 本图书`,
@@ -219,8 +373,13 @@ Page({
       confirmText: '查看图书',
       success: (res) => {
         if (res.confirm) {
+          // 跳转到图书页面并传递分类ID
           wx.switchTab({
-            url: '/pages/books/books'
+            url: '/pages/books/books',
+            success: () => {
+              getApp().globalData = getApp().globalData || {};
+              getApp().globalData.selectedCategory = categoryId;
+            }
           });
         }
       }
@@ -228,10 +387,20 @@ Page({
   },
 
   // 下拉刷新
-  onPullDownRefresh: function() {
-    this.loadPageData();
-    setTimeout(() => {
+  async onPullDownRefresh() {
+    try {
+      await this.loadPageData();
+      wx.showToast({
+        title: '刷新成功',
+        icon: 'success'
+      });
+    } catch (error) {
+      wx.showToast({
+        title: '刷新失败',
+        icon: 'none'
+      });
+    } finally {
       wx.stopPullDownRefresh();
-    }, 1000);
+    }
   }
 })

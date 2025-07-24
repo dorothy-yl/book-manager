@@ -1,0 +1,73 @@
+<!--pages/test/test.wxml-->
+<view class="container">
+  <view class="header">
+    <text class="title">网络请求测试</text>
+    <text class="subtitle">测试与 http://localhost:3000 的连接</text>
+  </view>
+
+  <view class="controls">
+    <button class="btn btn-primary" bindtap="onRetry" disabled="{{loading}}">
+      {{loading ? '测试中...' : '重新测试'}}
+    </button>
+    <button class="btn btn-secondary" bindtap="testSingleAPI">
+      单个测试
+    </button>
+    <button class="btn btn-info" bindtap="onViewLogs">
+      查看日志
+    </button>
+  </view>
+
+  <view class="results">
+    <view class="results-header">
+      <text class="results-title">测试结果</text>
+      <text class="results-count">共 {{testResults.length}} 项</text>
+    </view>
+
+    <view class="test-list">
+      <view wx:for="{{testResults}}" wx:key="index" class="test-item">
+        <view class="test-info">
+          <text class="test-name">{{item.name}}</text>
+          <text class="test-time">{{item.time}}</text>
+        </view>
+        <view class="test-result">
+          <text class="result-text" style="color: {{item.color}}">
+            {{item.result}}
+          </text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{testResults.length === 0 && !loading}}" class="empty-state">
+      <text class="empty-text">暂无测试结果</text>
+      <text class="empty-subtext">点击"重新测试"开始测试</text>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading-state">
+      <text class="loading-text">正在运行测试...</text>
+    </view>
+  </view>
+
+  <view class="info-section">
+    <view class="info-card">
+      <text class="info-title">测试说明</text>
+      <text class="info-content">
+        • 基础连接：测试与服务器的基本连接
+        • 图书列表：测试获取图书列表接口
+        • 搜索功能：测试图书搜索接口
+        • 统计信息：测试获取统计数据接口
+        • 用户信息：测试用户相关接口
+        • 权限测试：测试需要登录的接口
+      </text>
+    </view>
+
+    <view class="info-card">
+      <text class="info-title">注意事项</text>
+      <text class="info-content">
+        • 确保后端服务在 localhost:3000 运行
+        • 确保微信开发者工具已勾选"不校验合法域名"
+        • 某些测试可能需要用户登录才能通过
+        • 查看控制台获取详细的错误信息
+      </text>
+    </view>
+  </view>
+</view> 

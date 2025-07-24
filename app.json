@@ -2,7 +2,8 @@
   "pages": [
     "pages/index/index",
     "pages/books/books",
-    "pages/my/my"
+    "pages/my/my",
+    "pages/test/test"
   ],
 
   "window": {
