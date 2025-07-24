@@ -1,3 +1,8 @@
 {
-  "usingComponents": {}
+  "usingComponents": {},
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#f7f7f7",
+  "navigationBarTitleText": "借阅书架",
+  "navigationBarBackgroundColor": "#f5f5f5",
+  "navigationBarTextStyle": "black"
 }

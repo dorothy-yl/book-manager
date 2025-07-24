@@ -14,30 +14,29 @@
   },
   
   "tabBar": {
-    "selectedColor": "#800080",
-    "position": "bottom",
+
     "list": [
-    {
-        "pagePath": "pages/index/index",
-        "text":"图书漂流",
-        "iconPath":"images/home.png",
-    "selecttedIconPath":"images/home_select.png"
-    },
-    {
-        "pagePath": "pages/books/books",
-        "text":"借阅书架",
 
-        "iconPath": "images/s.png" ,
-        "selectedIconPath":"images/s.png"
-    
-      },
       {
-        "pagePath" :"pages/my/my",
-        "text":"我的图书",
-        "iconPath": "images/my.png" ,
-        "selectedIconPath":"images/my_select.png"
-      }
-  ]
-  }
+        "pagePath": "pages/index/index",
+        "text": "图书漂流",
+        "iconPath": "/images/home.jpg",
+        "selectedIconPath": "/images/home_select.jpg"
+      },
+{
+        "pagePath": "pages/books/books",
+        "text": "借阅书架",
+        "iconPath": "/images/yue.jpg",
+        "selectedIconPath": "/images/yue.jpg"
+      },
 
+      {
+        "pagePath": "pages/my/my",
+        "text": "我的图书",
+        "iconPath": "/images/my.jpg",
+        "selectedIconPath": "/images/my_select.jpg"
+      }
+    ]
+  }
+  
 }

@@ -1,17 +1,117 @@
-<image src="/images/s.png" style="height: 100rpx;width: 150rpx;"/>
-<view class="desc">流动图书是一个图书漂流和借阅工具，都在共享闲置图书，并链接趣味相投的小伙伴。</view>
-<text class="text-line">  </text>
-<text class="text-line">  </text>
-<view class="sub-desc">漂流图书到公司或学校，结识志趣相投的TA,快来开始你的图书漂流之旅吧！</view>
-<button class="scan-btn"bindtap="scanBook">扫一扫漂流图书</button>
-<text class="text-line">  </text>
-<text class="text-line">  </text>
-<text class="text-line">  </text>
-<text class="text-line">  </text>
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-bar">
+      <view class="search-icon">🔍</view>
+      <input class="search-input" placeholder="搜索图书、作者或分类" bindinput="onSearchInput" bindconfirm="onSearch"/>
+      <view class="search-btn" bindtap="onSearch">搜索</view>
+    </view>
+  </view>
 
-<!--新书速递区域-->
-<text class="section-title">新书速递</text>
-<view class="text-left">
+  <!-- 主要内容区域 -->
+  <scroll-view class="main-content" scroll-y="true">
+    <!-- 统计卡片区域 -->
+    <view class="stats-section">
+      <view class="stats-grid">
+        <view class="stat-card">
+          <view class="stat-icon">📚</view>
+          <view class="stat-content">
+            <text class="stat-number">{{totalBooks}}</text>
+            <text class="stat-label">总藏书量</text>
+          </view>
+        </view>
+        <view class="stat-card">
+          <view class="stat-icon">🔄</view>
+          <view class="stat-content">
+            <text class="stat-number">{{activeExchanges}}</text>
+            <text class="stat-label">活跃交换</text>
+          </view>
+        </view>
+        <view class="stat-card">
+          <view class="stat-icon">👥</view>
+          <view class="stat-content">
+            <text class="stat-number">{{activeUsers}}</text>
+            <text class="stat-label">活跃用户</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快捷功能区域 -->
+    <view class="quick-actions">
+      <view class="section-title">快捷功能</view>
+      <view class="actions-grid">
+        <view class="action-item" bindtap="scanBook">
+          <view class="action-icon-bg scan-bg">
+            <text class="action-icon-text">📷</text>
+          </view>
+          <text class="action-label">扫描图书</text>
+        </view>
+        <view class="action-item" bindtap="addBook">
+          <view class="action-icon-bg add-bg">
+            <text class="action-icon-text">➕</text>
+          </view>
+          <text class="action-label">添加图书</text>
+        </view>
+        <view class="action-item" bindtap="browseBooks">
+          <view class="action-icon-bg browse-bg">
+            <text class="action-icon-text">📖</text>
+          </view>
+          <text class="action-label">浏览书架</text>
+        </view>
+        <view class="action-item" bindtap="myBooks">
+          <view class="action-icon-bg my-bg">
+            <text class="action-icon-text">📋</text>
+          </view>
+          <text class="action-label">我的图书</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 新书速递区域 -->
+    <view class="new-books-section">
+      <view class="section-header">
+        <text class="section-title">新书速递</text>
+        <view class="section-more" bindtap="viewMoreBooks">
+          <text class="more-text">查看更多</text>
+          <text class="more-icon">→</text>
+        </view>
+      </view>
+      <scroll-view class="books-scroll" scroll-x="true">
+        <view class="books-container">
+          <view class="book-item" wx:for="{{newBooks}}" wx:key="id" bindtap="viewBookDetail" data-id="{{item.id}}">
+            <view class="book-cover-container">
+              <image class="book-cover" src="{{item.cover}}" mode="aspectFill"></image>
+              <view class="book-status" wx:if="{{item.status === 'available'}}">可借阅</view>
+              <view class="book-status borrowed" wx:if="{{item.status === 'borrowed'}}">已借出</view>
+            </view>
+            <view class="book-info">
+              <text class="book-title">{{item.title}}</text>
+              <text class="book-author">{{item.author}}</text>
+              <view class="book-tags">
+                <text class="book-tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+
+    <!-- 热门分类区域 -->
+    <view class="categories-section">
+      <view class="section-header">
+        <text class="section-title">热门分类</text>
+      </view>
+      <view class="categories-grid">
+        <view class="category-item" wx:for="{{categories}}" wx:key="id" bindtap="viewCategory" data-id="{{item.id}}">
+          <view class="category-icon">{{item.icon}}</view>
+          <text class="category-name">{{item.name}}</text>
+          <text class="category-count">{{item.count}}本</text>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
 </view>
-  <image src="/images/Y.jpg" style="width: 400rpx;height: 380rpx;"/>
-<image src="/images/JA.jpg" style="width: 350rpx;height: 380rpx;"/>
+
+

@@ -1,1 +1,99 @@
+<!--pages/books/books.wxml-->
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-section">
+    <view class="search-bar">
+      <view class="search-icon">🔍</view>
+      <input class="search-input" placeholder="搜索书籍、作者或分类..." bindinput="onSearchInput" />
+      <view class="search-btn" bindtap="onSearch">搜索</view>
+    </view>
+  </view>
 
+  <!-- 分类标签 -->
+  <view class="category-tabs">
+    <scroll-view class="tabs-scroll" scroll-x="true" show-scrollbar="false">
+      <view class="tabs-container">
+        <view class="tab {{currentTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">
+          <text class="tab-text">全部</text>
+        </view>
+        <view class="tab {{currentTab === 'reading' ? 'active' : ''}}" bindtap="switchTab" data-tab="reading">
+          <text class="tab-text">在读</text>
+        </view>
+        <view class="tab {{currentTab === 'finished' ? 'active' : ''}}" bindtap="switchTab" data-tab="finished">
+          <text class="tab-text">已读</text>
+        </view>
+        <view class="tab {{currentTab === 'wishlist' ? 'active' : ''}}" bindtap="switchTab" data-tab="wishlist">
+          <text class="tab-text">想读</text>
+        </view>
+        <view class="tab {{currentTab === 'recommend' ? 'active' : ''}}" bindtap="switchTab" data-tab="recommend">
+          <text class="tab-text">推荐</text>
+        </view>
+        <view class="tab {{currentTab === 'favorite' ? 'active' : ''}}" bindtap="switchTab" data-tab="favorite">
+          <text class="tab-text">收藏</text>
+        </view>
+        <view class="tab {{currentTab === 'recent' ? 'active' : ''}}" bindtap="switchTab" data-tab="recent">
+          <text class="tab-text">最近</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 书籍列表 -->
+  <scroll-view class="books-container" scroll-y="true" enable-flex="true">
+    <view class="books-list" wx:if="{{filteredBooks.length > 0}}">
+      <view class="book-card" wx:for="{{filteredBooks}}" wx:key="id" bindtap="onBookTap" data-book="{{item}}">
+        <!-- 书籍封面 -->
+        <view class="book-cover">
+          <image class="cover-image" src="{{item.cover}}" mode="aspectFill"></image>
+        </view>
+        
+        <!-- 书籍信息 -->
+        <view class="book-info">
+          <view class="book-header">
+            <text class="book-title">{{item.title}}</text>
+            <view class="book-actions">
+              <view class="action-btn favorite-btn" bindtap="toggleFavorite" data-id="{{item.id}}" catchtap="true">
+                <text class="action-icon">{{item.isFavorite ? '❤️' : '🤍'}}</text>
+              </view>
+            </view>
+          </view>
+          
+          <text class="book-author">{{item.author}}</text>
+          
+          <view class="book-meta">
+            <view class="book-category">
+              <text class="category-text">{{item.category}}</text>
+            </view>
+            <view class="book-rating">
+              <text class="rating-text">⭐ {{item.rating}}</text>
+            </view>
+          </view>
+          
+          <view class="book-progress" wx:if="{{item.progress}}">
+            <view class="progress-bar">
+              <view class="progress-fill" style="width: {{item.progress}}"></view>
+            </view>
+            <text class="progress-text">已读{{item.progress}}%</text>
+          </view>
+          
+          <view class="book-status">
+            <text class="status-text {{item.status}}">{{item.statusText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{filteredBooks.length === 0}}">
+      <view class="empty-icon">📚</view>
+      <text class="empty-text">暂无相关书籍</text>
+      <text class="empty-subtext">快去漂流图书馆寻找心仪的书籍吧</text>
+      <button class="empty-btn" bindtap="onAddBook">添加第一本书</button>
+    </view>
+  </scroll-view>
+
+  <!-- 浮动按钮 -->
+  <view class="fab" bindtap="onAddBook">
+    <text class="fab-icon">+</text>
+  </view>
+</view>

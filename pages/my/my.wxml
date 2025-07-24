@@ -1,0 +1,215 @@
+<!--pages/my/my.wxml-->
+<view class="container">
+  <!-- 个人主页区域 -->
+  <view class="profile-section">
+    <view class="profile-card">
+      <view class="profile-header">
+        <view class="avatar-container">
+          <image class="avatar" src="{{userInfo.avatarUrl || '/pages/images/s.png'}}" mode="aspectFill"></image>
+          <view class="avatar-edit" bindtap="editAvatar">📷</view>
+        </view>
+        <view class="profile-info">
+          <view class="name-level-row">
+            <text class="username">{{userInfo.nickName || '未登录用户'}}</text>
+            <text class="user-level">{{userInfo.level || '普通会员'}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="profile-stats">
+        <view class="stat-item">
+          <text class="stat-number">{{userInfo.borrowCount || 0}}</text>
+          <text class="stat-label">借阅次数</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{userInfo.shareCount || 0}}</text>
+          <text class="stat-label">分享图书</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-number">{{userInfo.points || 0}}</text>
+          <text class="stat-label">积分</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我的图书区域 -->
+  <view class="books-section">
+    <view class="books-row">
+      <!-- 借阅的图书 -->
+      <view class="book-category">
+        <view class="category-header">
+          <view class="category-title">
+            <text class="title-icon">📚</text>
+            <text class="title-text">我借阅的图书</text>
+          </view>
+          <view class="category-more" bindtap="viewAllBorrowed">
+            <text class="more-text">查看全部</text>
+            <text class="more-icon">></text>
+          </view>
+        </view>
+        <scroll-view class="books-scroll" scroll-x="true" wx:if="{{borrowedBooks.length > 0}}">
+          <view class="books-container">
+            <view class="book-card" wx:for="{{borrowedBooks}}" wx:key="id" bindtap="viewBookDetail" data-id="{{item.id}}">
+              <view class="book-cover-container">
+                <image class="book-cover" src="{{item.cover}}" mode="aspectFill"></image>
+                <view class="book-status borrowed">借阅中</view>
+                <view class="return-date">归还: {{item.returnDate}}</view>
+              </view>
+              <view class="book-info">
+                <text class="book-title">{{item.title}}</text>
+                <text class="book-author">{{item.author}}</text>
+                <view class="book-progress">
+                  <view class="progress-bar">
+                    <view class="progress-fill" style="width: {{item.progress}}"></view>
+                  </view>
+                  <text class="progress-text">剩余{{item.remainingDays}}天</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+        <view class="empty-state" wx:if="{{borrowedBooks.length === 0}}">
+          <text class="empty-icon">📚</text>
+          <text class="empty-text">暂无借阅图书</text>
+          <button class="empty-btn" bindtap="goToBrowse">去浏览图书</button>
+        </view>
+      </view>
+
+      <!-- 发布的图书 -->
+      <view class="book-category">
+        <view class="category-header">
+          <view class="category-title">
+            <text class="title-icon">📖</text>
+            <text class="title-text">我发布的图书</text>
+          </view>
+          <view class="category-more" bindtap="viewAllShared">
+            <text class="more-text">查看全部</text>
+            <text class="more-icon">></text>
+          </view>
+        </view>
+        <scroll-view class="books-scroll" scroll-x="true" wx:if="{{sharedBooks.length > 0}}">
+          <view class="books-container">
+            <view class="book-card" wx:for="{{sharedBooks}}" wx:key="id" bindtap="viewBookDetail" data-id="{{item.id}}">
+              <view class="book-cover-container">
+                <image class="book-cover" src="{{item.cover}}" mode="aspectFill"></image>
+                <view class="book-status {{item.status === 'available' ? 'available' : 'borrowed'}}">
+                  {{item.status === 'available' ? '可借阅' : '已借出'}}
+                </view>
+                <view class="book-actions">
+                  <view class="action-btn edit-btn" bindtap="editBook" data-id="{{item.id}}">✏️</view>
+                  <view class="action-btn delete-btn" bindtap="deleteBook" data-id="{{item.id}}">🗑️</view>
+                </view>
+              </view>
+              <view class="book-info">
+                <text class="book-title">{{item.title}}</text>
+                <text class="book-author">{{item.author}}</text>
+                <view class="book-meta">
+                  <text class="borrow-count">借阅{{item.borrowCount}}次</text>
+                  <text class="favorite-count">收藏{{item.favoriteCount}}次</text>
+                </view>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+        <view class="empty-state" wx:if="{{sharedBooks.length === 0}}">
+          <text class="empty-icon">📖</text>
+          <text class="empty-text">暂无发布图书</text>
+          <button class="empty-btn" bindtap="addNewBook">发布第一本书</button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷功能区域 -->
+  <view class="quick-actions">
+    <view class="action-grid">
+      <view class="action-item" bindtap="addNewBook">
+        <view class="action-icon add-icon">➕</view>
+        <text class="action-label">发布图书</text>
+      </view>
+      <view class="action-item" bindtap="scanBook">
+        <view class="action-icon scan-icon">📷</view>
+        <text class="action-label">扫码添加</text>
+      </view>
+      <view class="action-item" bindtap="myFavorites">
+        <view class="action-icon favorite-icon">❤️</view>
+        <text class="action-label">我的收藏</text>
+      </view>
+      <view class="action-item" bindtap="borrowHistory">
+        <view class="action-icon history-icon">📅</view>
+        <text class="action-label">借阅历史</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单区域 -->
+  <view class="menu-section">
+    <!-- 个人设置 -->
+    <view class="menu-group">
+      <view class="group-title">个人设置</view>
+      <view class="menu-list">
+        <view class="menu-item" bindtap="editProfile">
+          <view class="menu-icon profile-icon">👤</view>
+          <view class="menu-content">
+            <text class="menu-title">个人资料</text>
+            <text class="menu-desc">编辑个人信息</text>
+          </view>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="notificationSettings">
+          <view class="menu-icon notification-icon">🔔</view>
+          <view class="menu-content">
+            <text class="menu-title">通知设置</text>
+            <text class="menu-desc">管理推送通知</text>
+          </view>
+          <view class="menu-badge" wx:if="{{notificationCount > 0}}">{{notificationCount}}</view>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="privacySettings">
+          <view class="menu-icon privacy-icon">🔒</view>
+          <view class="menu-content">
+            <text class="menu-title">隐私设置</text>
+            <text class="menu-desc">管理隐私选项</text>
+          </view>
+          <text class="menu-arrow">></text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 其他功能 -->
+    <view class="menu-group">
+      <view class="group-title">其他</view>
+      <view class="menu-list">
+        <view class="menu-item" bindtap="helpCenter">
+          <view class="menu-icon help-icon">❓</view>
+          <view class="menu-content">
+            <text class="menu-title">帮助中心</text>
+            <text class="menu-desc">常见问题解答</text>
+          </view>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="aboutUs">
+          <view class="menu-icon about-icon">ℹ️</view>
+          <view class="menu-content">
+            <text class="menu-title">关于我们</text>
+            <text class="menu-desc">了解更多信息</text>
+          </view>
+          <text class="menu-arrow">></text>
+        </view>
+        <view class="menu-item" bindtap="feedback">
+          <view class="menu-icon feedback-icon">💬</view>
+          <view class="menu-content">
+            <text class="menu-title">意见反馈</text>
+            <text class="menu-desc">告诉我们您的建议</text>
+          </view>
+          <text class="menu-arrow">></text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 退出登录按钮 -->
+  <view class="logout-section" wx:if="{{isLoggedIn}}">
+    <button class="logout-btn" bindtap="logout">退出登录</button>
+  </view>
+</view>
